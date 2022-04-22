@@ -4,6 +4,7 @@
 # "BetaMining" package to analyze .pdb files of interest.
 import os
 import re
+import json
 import shutil
 import prody
 import numpy as np
@@ -33,6 +34,16 @@ def assign_secondary_structure(phi, psi, omega):
         return "cis"
     else:
         return ""
+
+def import_json(json_file):
+    """returns a dictionary containing the parameters that define secondary structures, units used, common id format regular expressions, and secondary structure pattern regular expressions.
+
+    Keyword arguments:
+    json_file -- the json file that includes parameters above
+    """
+    with open(json_file, "r") as f:
+        data = json.load(f)
+        return data
 
 
 def find_contacts(model, distance=6, exclude=2):
