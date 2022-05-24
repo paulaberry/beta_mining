@@ -10,12 +10,12 @@ import pkgutil
 import yaml
 import shutil
 import signal
+import datetime
 from pprint import pprint
 from pathlib import Path
-from datetime import datetime
 from argparse import ArgumentParser
 
-from beta_mining import filter_proteins
+from beta_mining import process_structures
 
 script_description = (
   "This is a Python 3 package for identifying secondary structure patterns from multimer assemblies of predicted monomer structure files."
@@ -29,6 +29,62 @@ def handler(signal_number, frame):
     elif signal_number == signal.SIGTSTP:
         print("Suspend not supported, aborting script.")
         sys.exit(0)
+
+def generate_yaml(yaml_settings):
+    """Creates a yaml config file in the current working directory.
+
+    Keyword arguments:
+    yaml_settings -- the dictionary created from the config file
+
+    """
+    pass
+
+def main():
+    parser = ArgumentParser("beta_mining", description = script_description)
+    parser.add_argument("-c", "--config", help = "The config file (YAML format) to use for a run.", type = str, default = "default_config.yml")
+    parser.add_argument("-f", "--filepath", help = "If running beta_mining in default mode, indicate path to .pdb files here. A default YAML will be generated and a timestamp-based prefix will be used for all outputs.", action = "store_const", const = "no_input")
+    parser.add_argument("-d", "--defaults", help = "Generate a default YAML config file in the current working directory.", action = "store_true")
+    args = parser.parse_args()
+
+    # Make default YAML config and quit.
+    if args.defaults:
+        path = os.getcwd()
+        generate_yaml()
+        print("Default config YAML generated and saved to: '{}'. Exiting.".format(path))
+        sys.exit(0)
+
+    # If a filepath is specified, generate default YAML and run the full program.
+    elif args.filepath != "no_input":
+        if args.config != "default_config.yml":
+            print("Filepath default mode and YAML are mutually exclusive. Please use one or the other. Exiting.")
+            sys.exit(0)
+        filepath = args.filepath
+        now = datetime.datetime.now()
+        timestamp = "".join(str(now.year), str(now.month), str(now.day), str(now.hour), str(now.minute), str(now.second), "_")
+        generate_yaml(filepath, timestamp)
+        settings = yaml.load(timestamp + "config.yml", Loader = yaml.FullLoader)
+        settings["results_prefix"] = timestamp
+        settings["input_filepath"] = filepath
+    # If a config is specified, load all arguments from it.
+    elif args.config != "default_config.yml":
+        settings = yaml.load(args.config, Loader = yaml.FullLoader)
+        if settings["results_prefix"] == "default":
+            now = datetime.datetime.now()
+            timestamp = "".join(str(now.year), str(now.month), str(now.day), str(now.hour), str(now.minute), str(now.second), "_")
+            settings["results_prefix"] == timestamp
+    else:
+        print("Unable to process arguments. Exiting.")
+        sys.exit(0)
+
+    # Create output directory if it doesn't exist
+
+    # Run the main algorithm
+    process_structures(settings)
+
+
+
+
+
 
 
 if __name__ == "__main__":
