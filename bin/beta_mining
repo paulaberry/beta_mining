@@ -5,6 +5,8 @@
 
 import os
 import sys
+sys.path.insert(0,"../")
+#sys.path.insert(0, "../beta_mining/")
 import pandas as pd
 import pkgutil
 import yaml
@@ -15,7 +17,9 @@ from pprint import pprint
 from pathlib import Path
 from argparse import ArgumentParser
 
-from beta_mining import process_structures
+import beta_mining
+from beta_mining import beta_mining_algorithm
+from beta_mining import beta_mining_functions
 
 script_description = (
   "This is a Python 3 package for identifying secondary structure patterns from multimer assemblies of predicted monomer structure files."
@@ -30,21 +34,27 @@ def handler(signal_number, frame):
         print("Suspend not supported, aborting script.")
         sys.exit(0)
 
-def generate_yaml(yaml_settings):
+def generate_yaml(target_directory = os.getcwd(), prefix = "generated_"):
     """Creates a yaml config file in the current working directory.
 
     Keyword arguments:
-    yaml_settings -- the dictionary created from the config file
-
+    target_directory -- directory where the YAML config file will be created
+    prefix -- the prefix for the created YAML config file
     """
-    pass
+    config_default_text = pkgutil.get_data("beta_mining","default_config.yml")
+    with open(target_directory + prefix + "config.yml", "w") as configfile:
+        configfile.write(config_default_text.decode("utf-8"))
 
 def main():
     parser = ArgumentParser("beta_mining", description = script_description)
     parser.add_argument("-c", "--config", help = "The config file (YAML format) to use for a run.", type = str, default = "default_config.yml")
-    parser.add_argument("-f", "--filepath", help = "If running beta_mining in default mode, indicate path to .pdb files here. A default YAML will be generated and a timestamp-based prefix will be used for all outputs.", action = "store_const", const = "no_input")
+    parser.add_argument("-f", "--filepath", help = "If running beta_mining in default mode, indicate path to .pdb files here. A default YAML will be generated and a timestamp-based prefix will be used for all outputs.", type = str, default = "no_input")
     parser.add_argument("-d", "--defaults", help = "Generate a default YAML config file in the current working directory.", action = "store_true")
     args = parser.parse_args()
+
+
+    now = datetime.datetime.now()
+    timestamp = "".join([str(now.year), str(now.month), str(now.day), str(now.hour), str(now.minute), str(now.second), "_"])
 
     # Make default YAML config and quit.
     if args.defaults:
@@ -59,27 +69,39 @@ def main():
             print("Filepath default mode and YAML are mutually exclusive. Please use one or the other. Exiting.")
             sys.exit(0)
         filepath = args.filepath
-        now = datetime.datetime.now()
-        timestamp = "".join(str(now.year), str(now.month), str(now.day), str(now.hour), str(now.minute), str(now.second), "_")
+
         generate_yaml(filepath, timestamp)
-        settings = yaml.load(timestamp + "config.yml", Loader = yaml.FullLoader)
+        print(os.getcwd())
+        config = open(filepath + timestamp + "config.yml", "r")
+        settings = yaml.load(config, Loader = yaml.FullLoader)
+        config.close()
         settings["results_prefix"] = timestamp
         settings["input_filepath"] = filepath
+
+        yaml_stream = open(filepath + timestamp + "config.yml", "w")
+        yaml.dump(settings, yaml_stream)
+        yaml_stream.close()
+
     # If a config is specified, load all arguments from it.
     elif args.config != "default_config.yml":
-        settings = yaml.load(args.config, Loader = yaml.FullLoader)
+        config = open(args.config, "r")
+        settings = yaml.load(config, Loader = yaml.FullLoader)
+        config.close()
         if settings["results_prefix"] == "default":
-            now = datetime.datetime.now()
-            timestamp = "".join(str(now.year), str(now.month), str(now.day), str(now.hour), str(now.minute), str(now.second), "_")
-            settings["results_prefix"] == timestamp
+            settings["results_prefix"] = timestamp
+            config = open(args.config, "a")
+            config.write("\ntimestamp: " + timestamp)
+            config.close()
     else:
         print("Unable to process arguments. Exiting.")
         sys.exit(0)
 
     # Create output directory if it doesn't exist
+    if os.path.isdir(settings["output_filepath"]) == False:
+        os.mkdir(settings["output_filepath"])
 
     # Run the main algorithm
-    process_structures(settings)
+    beta_mining_algorithm.main(settings)
 
 
 

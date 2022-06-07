@@ -1,0 +1,72 @@
+# The prefix used to uniquely identify this session. This will be prepended to all output directory and filenames. A copy of the config YAML file used to generate the results of a session will have this prefix and be saved with the output. The default prefix is a timestamp in YYYYMMDDHHSS_ format, created when the script is initialized.
+results_prefix: default
+
+# The filepath to a directory of .pdb structure files to be analyzed. It is recommended that the absolute filepath is used.
+input_filepath: ../input/
+
+# The filepath to the directory where results should be saved.
+output_filepath: ../output/test_dir/
+
+# Filepath to a custom .json file. Use `Null` if you wish to use the default .json included in the beta_mining module.
+custom_json: Null
+
+# units in which to calculate dihedral angles. Enter "radians" or "degrees"
+units: degrees
+
+# The desired output filename for individual proteins, only relevant if `proteome_aa` is indicated as a desired output below under `save_files`.
+output_filename: _complete_aa.csv
+
+# A list of which structures to target in a run.
+target_names:
+  - beta-run
+  - sextuple-helix
+
+# A list of desired outputs. "fasta" indicates the desire for all information and sequence hits in a fasta file, "hits_aa" will also output a large datatable of every residue in every hit sequence, proteome_aa will output individual datatables of all calculations for each protein structure file, regardless of hit status. This can be useful for figuring out why a certain protein is or is not classified as a hit.
+save_files:
+  - hits_fasta
+  - hits_aa
+  - proteome_aa
+
+# Indicate the order to apply the inclusion/exclusion criteria for targets.
+conditions:
+  - include
+  - exclude
+
+timestamp: 20226217849_
+
+timestamp: 202262171249_
+timestamp: 202262171338_
+timestamp: 202262171422_
+
+timestamp: 202262173857_
+timestamp: 20226217404_
+timestamp: 202262174048_
+timestamp: 202262174119_
+timestamp: 202262174138_
+timestamp: 20226313420_
+timestamp: 202263135354_
+timestamp: 202263135627_
+timestamp: 202263135648_
+timestamp: 202263154527_
+timestamp: 202263155326_
+timestamp: 202263155346_
+timestamp: 202263155928_
+timestamp: 20226316313_
+timestamp: 202263161212_
+timestamp: 202263161222_
+timestamp: 20226316156_
+timestamp: 20226316164_
+timestamp: 202263161643_
+timestamp: 202263163254_
+timestamp: 202263163332_
+timestamp: 202263164212_
+timestamp: 202263164250_
+timestamp: 202263164617_
+timestamp: 202263164641_
+
+timestamp: 202263165737_
+timestamp: 20226316580_
+timestamp: 20226317349_
+timestamp: 20226317353_
+timestamp: 202263173536_
+timestamp: 202266105353_

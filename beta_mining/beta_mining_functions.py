@@ -25,8 +25,11 @@ import shutil
 import glob
 from pathlib import Path
 
+import beta_mining
+from beta_mining import beta_mining_algorithm
+from beta_mining import beta_mining_functions
 
-def polymer_df(pdb_meta_dict, pdb_file):
+def polymer_df(pdb_meta_dict, pdb_object):
   """returns a dataframe of polymer metadata and residue information from the
   PDB file. Returned dataframe consists of columns that identify the
   file, origin, and version of PDB prediction file the values are calculated from
@@ -40,16 +43,16 @@ def polymer_df(pdb_meta_dict, pdb_file):
   pdb_meta_dict -- a dictionary of keys and values for dataframe columns
   pdb_file -- the filepath for the PDB file
   """
-  df = PandasPdb().read_pdb(pdb_file).df["ATOM"]
-  df = df.loc[df["atom_name"] == "CA"]
+  df = pdb_object.loc[df["atom_name"] == "CA"]
   column_list_order = list(pdb_meta_dict.keys()) + ["residue_name", "residue_number", "x_coord", "y_coord", "z_coord", "b_factor"]
   df = df.assign(**pdb_meta_dict)
-
   df = df.reindex(columns = column_list_order)
+  if pdb_meta_dict["full_title"].lower().find("alphafold") != -1:
+      df = df.rename(columns = {"b_factor": "plddt"})
   return df
 
 
-def calculation_df(prody_model, residue_offset, secondary_structures = target_parameters["secondary_structures"], units = "degrees"):
+def calculation_df(prody_model, residue_offset, secondary_structures, units = "degrees"):
   """returns a dataframe of relative residue numbers and phi, psi, omega, twist,
   and absolute residue numbers for a protein; returns a series of secondary
   structure symbols for
@@ -174,7 +177,7 @@ def attribute_filter(target_json, match_object, dihedral_dataframe):
   dihedral_dataframe -- the dataframe containing the calculated dihedral angles and other attributes for the protein
   """
   available_calculation_list = list(dihedral_dataframe.columns)
-  for condition in ["exclude", "include"]: # the function immediately returns False if any part fails, so exclude comes first
+  for condition in ["exclude", "include"]: # the function immediately returns False if any part fails, so exclude comes first no matter what the order is in the YAML config
     for attribute in target_json[condition]:
       if attribute in available_calculation_list:
         for func_name in target_json[condition][attribute]:
@@ -187,15 +190,25 @@ def attribute_filter(target_json, match_object, dihedral_dataframe):
               return False
   return True
 
-  def create_model_metainfo(pdb_file):
-      """returns a ProDy model and a dictionary of meta information about a protein, taken from the PDB file header. Also returns the amino acid sequence as a list of 1-letter codes, and a Pandas dataframe of atomic coordinates.
+def create_model_metainfo(pdb_file):
+    """returns a ProDy model and a dictionary of meta information about a protein, taken from the PDB file header. Also returns the amino acid sequence as a list of 1-letter codes, and a Pandas dataframe of atomic coordinates.
 
-      Keyword arguments:
-      pdb_file -- the PDB structure file
-      """
-      model, pdb_head = prody.parsePDB(af_file, header=True, model=1, meta=True)
+    Keyword arguments:
+    pdb_file -- the PDB structure file
+    """
+    model, pdb_head = prody.parsePDB(pdb_file, header=True, model=1, meta=True)
+    # using BioPandas to get matrix of PDB values and convert sequence to single letter
+    af_object = PandasPdb().read_pdb(pdb_file).df["ATOM"]
+    af_sequence = list(PandasPdb().read_pdb(pdb_file).amino3to1()["residue_name"])
 
-      meta_dictionary = {
+    # decompress if needed
+    if pdb_file.endswith(".gz") == True:
+        uncompressed_pdb_file = gzip.open(pdb_file, "rt")
+        bio_pdb = p.get_structure("XXXX", uncompressed_pdb_file)
+    else:
+        bio_pdb = p.get_structure("XXXX", pdb_file)
+
+    meta_dictionary = {
         "database": pdb_head["polymers"][0].dbrefs[0].database,
         "id_code": pdb_head["polymers"][0].dbrefs[0].idcode,
         "accession": pdb_head["polymers"][0].dbrefs[0].accession,
@@ -204,35 +217,9 @@ def attribute_filter(target_json, match_object, dihedral_dataframe):
         "depo_date": pdb_head["deposition_date"],
         "fragment": int((((pdb_head["polymers"][0].dbrefs[0].first[2] - pdb_head["polymers"][0].dbrefs[0].first[0]) / 200)) + 1),
         "fragment_offset": pdb_head["polymers"][0].dbrefs[0].first[2] - pdb_head["polymers"][0].dbrefs[0].first[0],
-        "organism_scientific": p.get_structure("XXXX", af_file).header["source"]["1"]["organism_scientific"].upper(),
-        "organism_taxid": p.get_structure("XXXX", af_file).header["source"]["1"]["organism_taxid"]
+        "organism_scientific": bio_pdb.header["source"]["1"]["organism_scientific"].upper(),
+        "organism_taxid": bio_pdb.header["source"]["1"]["organism_taxid"]
         }
+    #pdb_file.close()
 
-    # using BioPandas to get matrix of PDB values and convert sequence to single letter
-    af_object = PandasPdb().read_pdb(af_file).df["ATOM"]
-    af_sequence = list(PandasPdb().read_pdb(af_file).amino3to1()["residue_name"])
     return model, meta_dictionary, af_object, af_sequence
-
-def analyze_structure():
-    pass
-
-
-def process_structures(settings):
-    """main entry point for the algorithm, processing the settings dicionary built from the config YAML file.
-
-    Keyword arguments:
-    settings -- dictionary generated from config YAML file
-    """
-    input_path = settings["input_filepath"]
-    output_path = settings["output_filepath"]
-    if os.path.isdir(output_path) == False:
-        os.mkdir(output_path)
-    file_list = glob.glob(input_path)
-    for file in file_list:
-        if file[:-4] == ".tar":
-            tar = tarfile.open(file, "r")
-            file_names = list(filter(lambda element: "pdb.gz" in element, tar.getnames()))
-            for member in file_names:
-                analyze_structure(tar.extract(member))
-        elif ".pdb" in file:
-            analyze_structure(file)

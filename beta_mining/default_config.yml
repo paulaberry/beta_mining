@@ -2,26 +2,32 @@
 results_prefix: default
 
 # The filepath to a directory of .pdb structure files to be analyzed. It is recommended that the absolute filepath is used.
-input_filepath: Null
+input_filepath: ../input/
 
 # The filepath to the directory where results should be saved.
-output_filepath: ../output
+output_filepath: ../output/
 
-# The desired output filenames
-output_filename: beta_mining_
+# Filepath to a custom .json file. Use `Null` if you wish to use the default .json included in the beta_mining module.
+custom_json: Null
+
+# units in which to calculate dihedral angles. Enter "radians" or "degrees"
+units: degrees
+
+# The desired output filename for individual proteins, only relevant if `proteome_aa` is indicated as a desired output below under `save_files`.
+output_filename: beta_mining_{structure_filename}.csv
 
 # A list of which structures to target in a run.
 target_names:
-  -beta-run
-  -sextuple-helix
+  - beta-run
+  - sextuple-helix
 
 # A list of desired outputs. "fasta" indicates the desire for all information and sequence hits in a fasta file, "hits_aa" will also output a large datatable of every residue in every hit sequence, proteome_aa will output individual datatables of all calculations for each protein structure file, regardless of hit status. This can be useful for figuring out why a certain protein is or is not classified as a hit.
 save_files:
-  -hits_fasta
-  -hits_aa
-  -proteome_aa
+  - hits_fasta
+  - hits_aa
+  - proteome_aa
 
 # Indicate the order to apply the inclusion/exclusion criteria for targets.
 conditions:
-  -include
-  -exclude
+  - include
+  - exclude
