@@ -42,12 +42,12 @@ def generate_yaml(target_directory = os.getcwd(), prefix = "generated_"):
     prefix -- the prefix for the created YAML config file
     """
     config_default_text = pkgutil.get_data("beta_mining","default_config.yml")
-    with open(target_directory + prefix + "config.yml", "w") as configfile:
+    with open(target_directory + prefix + "config.yaml", "w") as configfile:
         configfile.write(config_default_text.decode("utf-8"))
 
 def main():
     parser = ArgumentParser("beta_mining", description = script_description)
-    parser.add_argument("-c", "--config", help = "The config file (YAML format) to use for a run.", type = str, default = "default_config.yml")
+    parser.add_argument("-c", "--config", help = "The config file (YAML format) to use for a run.", type = str, default = "default_config.yaml")
     parser.add_argument("-f", "--filepath", help = "If running beta_mining in default mode, indicate path to .pdb files here. A default YAML will be generated and a timestamp-based prefix will be used for all outputs.", type = str, default = "no_input")
     parser.add_argument("-d", "--defaults", help = "Generate a default YAML config file in the current working directory.", action = "store_true")
     args = parser.parse_args()
@@ -65,20 +65,20 @@ def main():
 
     # If a filepath is specified, generate default YAML and run the full program.
     elif args.filepath != "no_input":
-        if args.config != "default_config.yml":
+        if args.config != "default_config.yaml":
             print("Filepath default mode and YAML are mutually exclusive. Please use one or the other. Exiting.")
             sys.exit(0)
         filepath = args.filepath
 
         generate_yaml(filepath, timestamp)
         print(os.getcwd())
-        config = open(filepath + timestamp + "config.yml", "r")
+        config = open(filepath + timestamp + "config.yaml", "r")
         settings = yaml.load(config, Loader = yaml.FullLoader)
         config.close()
         settings["results_prefix"] = timestamp
         settings["input_filepath"] = filepath
 
-        yaml_stream = open(filepath + timestamp + "config.yml", "w")
+        yaml_stream = open(filepath + timestamp + "config.yaml", "w")
         yaml.dump(settings, yaml_stream)
         yaml_stream.close()
 

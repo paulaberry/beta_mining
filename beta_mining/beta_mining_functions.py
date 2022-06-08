@@ -43,7 +43,7 @@ def polymer_df(pdb_meta_dict, pdb_object):
   pdb_meta_dict -- a dictionary of keys and values for dataframe columns
   pdb_file -- the filepath for the PDB file
   """
-  df = pdb_object.loc[df["atom_name"] == "CA"]
+  df = pdb_object.loc[pdb_object["atom_name"] == "CA"]
   column_list_order = list(pdb_meta_dict.keys()) + ["residue_name", "residue_number", "x_coord", "y_coord", "z_coord", "b_factor"]
   df = df.assign(**pdb_meta_dict)
   df = df.reindex(columns = column_list_order)
@@ -69,6 +69,7 @@ def calculation_df(prody_model, residue_offset, secondary_structures, units = "d
     radians = True
 
   symbol_list = []
+  ramachandran_region_list = []
   data = []
   for residue in prody_model.iterResidues():
     symbol = "-"
@@ -149,7 +150,6 @@ def contacts_df(pdb_dataframe, features_json, residue_features_dictionary, targe
                 array_idx.extend(residue_features_dictionary[structure])
               array_idx = list(np.asarray(list(set(residue_numbers_list) - set(array_idx))) - 1)
               contact_matrix[:,array_idx] = 0
-            print(contact_type["target_name"])
             if contact_type["target_name"] != ["all"]:
               target_idx = []
               for label in contact_type["target_name"]:
@@ -182,13 +182,23 @@ def attribute_filter(target_json, match_object, dihedral_dataframe):
       if attribute in available_calculation_list:
         for func_name in target_json[condition][attribute]:
           func = getattr(pd.Series, func_name)
-          if target[condition][attribute][func_name][0] <= func(dihedral_df[attribute][dihedral_df["residue_number"].isin([*range(match_object.span()[0] + 1, match_object.span()[1] + 2)])]) <= target[condition][attribute][func_name][1]:
+          if target_json[condition][attribute][func_name][0] <= func(dihedral_dataframe[attribute][dihedral_dataframe["residue_number"].isin([*range(match_object.span()[0] + 1, match_object.span()[1] + 2)])]) <= target_json[condition][attribute][func_name][1]:
             if condition == "exclude":
               return False
           else:
             if condition == "include":
               return False
   return True
+
+def attribute_calculations(config_add_attr, residue_range, poly_dataframe):
+    """returns a list to be column values of calculated attributes of hit sequences based on the "additional_attributes" section of the YAML config file.
+
+    Keyword arguments:
+    config_add_attr -- dictionary calculated attributes to include from the "additional_attributes" section of the config YAML
+    residue_range -- a tuple of the residue range over which to calculate the value
+    poly_dataframe -- a dataframe with all per-residue values needed for the attribute calculations
+    """
+    pass
 
 def create_model_metainfo(pdb_file):
     """returns a ProDy model and a dictionary of meta information about a protein, taken from the PDB file header. Also returns the amino acid sequence as a list of 1-letter codes, and a Pandas dataframe of atomic coordinates.

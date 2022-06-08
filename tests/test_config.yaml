@@ -13,8 +13,8 @@ custom_json: Null
 # units in which to calculate dihedral angles. Enter "radians" or "degrees"
 units: degrees
 
-# The desired output filename for individual proteins, only relevant if `proteome_aa` is indicated as a desired output below under `save_files`.
-output_filename: _complete_aa.csv
+# The desired output filename for hits, only relevant if `hits_fasta` or `hits_aa` indicated as a desired output below under `save_files`.
+output_filename: test_hits
 
 # A list of which structures to target in a run.
 target_names:
@@ -31,6 +31,13 @@ save_files:
 conditions:
   - include
   - exclude
+
+# Indicate addtional fields for hit attributes that should be reported in the output. The attribute name must appear in the dataframe generated from the PDB structure file, and the calculation to be performed must be an available function in the Python math module.
+additional_attributes:
+  twist: [mean]
+  plddt: [mean, min, max]
+  residue_number: [min, max]
+  absolute_residue_number: [min, max]
 
 timestamp: 20226217849_
 
@@ -70,3 +77,31 @@ timestamp: 20226317349_
 timestamp: 20226317353_
 timestamp: 202263173536_
 timestamp: 202266105353_
+
+timestamp: 202268161710_
+timestamp: 202268161839_
+timestamp: 202268161915_
+timestamp: 202268162039_
+
+timestamp: 202268162151_
+
+timestamp: 202268162227_
+
+timestamp: 202268162323_
+
+timestamp: 202268162458_
+timestamp: 202268162543_
+timestamp: 202268162631_
+timestamp: 202268162716_
+timestamp: 202268162744_
+timestamp: 202268162911_
+timestamp: 202268163120_
+timestamp: 202268163158_
+timestamp: 202268163239_
+timestamp: 202268163352_
+timestamp: 202268163423_
+timestamp: 202268163441_
+timestamp: 20226816357_
+timestamp: 202268163916_
+
+timestamp: 202268165142_

@@ -65,11 +65,12 @@ def analyze_structure(filename, config, json, output_dictionary):
     structure_length = len(structure_symbols_string)
 
     # generate dataframe of entire protein
-    residue_df = polymer_df(meta_dictionary, af_object)
-    residue_df = pd.merge(residue_dataframe, dihedral_df, on = "residue_number", how = "left")
+    residue_df = beta_mining_functions.polymer_df(meta_dictionary, af_object)
+    residue_df = pd.merge(residue_df, dihedral_df, on = "residue_number", how = "left")
     residue_df["structure_symbol"] = secondary_structure_series
-    if output_dictionary["proteome_aa"] != False:
-        output_filename = config["output_filepath"] + config["results_prefix"] + meta_dictionary["accession"] + "_f" + meta_dictionary["fragment"] + "_" + meta_dictionary["depo_date"].lower() + config["output_filename"]
+    if output_dictionary["proteome_aa"] != False: # save complete protein dataframe if indicated in config YAML
+        output_filename = config["output_filepath"] + config["results_prefix"] + meta_dictionary["accession"] + "_f" + str(meta_dictionary["fragment"]) + "_" + meta_dictionary["depo_date"].lower() + config["output_filename"]
+
         residue_df.to_csv(output_filename, index = False)
 
 
@@ -90,7 +91,7 @@ def analyze_structure(filename, config, json, output_dictionary):
                         ]
             regex_flank = target["regex_flank"]
             for match_obj in targets_found:
-                if attribute_filter(target, match_obj, dihedral_df) == False:
+                if beta_mining_functions.attribute_filter(target, match_obj, dihedral_df) == False:
                     print("attribute_filter was False!")
                     continue
                 else:
@@ -107,18 +108,29 @@ def analyze_structure(filename, config, json, output_dictionary):
                     ss_sequence = structure_symbols_string[res_idx_start:res_idx_end]
 
                     if output_dictionary["hits_fasta"] != False:
-                        fasta_header = ">" + "|".join(fasta_fields) + "residues " + str(res_start) + "-" + str(res_end)
-                        output_dictionary["hits_fasta"].writelines([fasta_header, aa_sequence])
+                        fasta_header = ">" + "|".join(fasta_fields) + "|residues " + str(res_start) + "-" + str(res_end)
+                        output_dictionary["hits_fasta"].write(fasta_header + "\n" + aa_sequence + "\n")
                     if output_dictionary["hits_aa"] != False:
-                        mean_plddt = 
-                        mean_twist =
-                        hit_line = fasta_fields +
-                            [str(res_start),
-                            str(res_end),
+                        hit_line = [target["name"],
+                            meta_dictionary["database"],
+                            meta_dictionary["id_code"],
+                            meta_dictionary["accession"],
+                            meta_dictionary["full_name"],
+                            meta_dictionary["full_title"],
+                            meta_dictionary["depo_date"],
+                            meta_dictionary["fragment"],
+                            meta_dictionary["fragment_offset"],
+                            meta_dictionary["organism_scientific"],
+                            meta_dictionary["organism_taxid"],
                             aa_sequence,
-                            ss_sequence,
-
-                            ]
+                            ss_sequence]
+                        for field in config["additional_attributes"].keys():
+                            for funct_name in config["additional_attributes"][field]:
+                                funct = getattr(pd.Series, funct_name)
+                                attr_value = funct(residue_df[field][residue_df["residue_number"].isin([*range(match_obj.span()[0] + 1, match_obj.span()[1]+ 2 )])])
+                                hit_line.append(attr_value)
+                        hit_line = list(map(str, hit_line))
+                        output_dictionary["hits_aa"].write(",".join(hit_line) + "\n")
 
 
 
@@ -132,7 +144,26 @@ def main(config_settings):
     input_path = config_settings["input_filepath"]
     output_path = config_settings["output_filepath"]
     results_prefix = config_settings["results_prefix"]
+    output_file = config_settings["output_filename"]
     conditions = config_settings["conditions"]
+
+    # output fields for hits_aa .csv
+    field_list = ["target",
+        "database",
+        "id_code",
+        "accession",
+        "full_name",
+        "full_title",
+        "depo_date",
+        "fragment",
+        "fragment_offset",
+        "organism_scientific",
+        "organism_taxid",
+        "aa_seq",
+        "ss_seq"]
+    for field in config_settings["additional_attributes"].keys():
+        for function in config_settings["additional_attributes"][field]:
+            field_list.append(field + "_" + function)
 
     ## import parameter json ##
     if config_settings["custom_json"] == None:
@@ -145,12 +176,13 @@ def main(config_settings):
     ### prepare output files ###
     #hits_fasta
     if "hits_fasta" in config_settings["save_files"]:
-        hits_fasta = open(output_path + results_prefix + ".fasta", "w")
+        hits_fasta = open(output_path + results_prefix + output_file + ".fasta", "w")
     else:
         hits_fasta = False
     #hits_aa
     if "hits_aa" in config_settings["save_files"]:
-        hits_aa = open(output_path + results_prefix + "_aa.csv", "w")
+        hits_aa = open(output_path + results_prefix + output_file + ".csv", "w")
+        hits_aa.write(",".join(field_list) + "\n")
     else:
         hits_aa = False
     #proteome_aa files are generated in analyze_structure function
