@@ -1,0 +1,3 @@
+[console_scripts]
+beta_mining = beta_mining:main
+

@@ -1,0 +1,11 @@
+README.md
+setup.py
+beta_mining/default_config.yaml
+beta_mining/structure_dictionary.json
+beta_mining.egg-info/PKG-INFO
+beta_mining.egg-info/SOURCES.txt
+beta_mining.egg-info/dependency_links.txt
+beta_mining.egg-info/entry_points.txt
+beta_mining.egg-info/requires.txt
+beta_mining.egg-info/top_level.txt
+bin/beta_mining

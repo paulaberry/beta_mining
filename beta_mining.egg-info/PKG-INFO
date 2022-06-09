@@ -1,0 +1,16 @@
+Metadata-Version: 1.2
+Name: beta-mining
+Version: 1.0.0
+Summary: UNKNOWN
+Home-page: https://github.com/paulaberry/beta_mining
+Author: Paula Berry
+Author-email: paula.l.berry@gmail.com, pberry@stowers.org
+License: GPL v3
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Academic Researchers
+Classifier: License :: GPL v3
+Classifier: Programming Language :: Python :: 3
+Classifier: Private :: Do Not Upload
+Requires-Python: >=3

@@ -24,7 +24,7 @@ setup(
         "biopandas>=0.4.1",
         "json5>=0.9.6",
         "numpy>=1.21",
-        "pandas>=1.4.1",
+        "pandas>=1.3",
         "ProDy>=2.0.2",
         "python-dateutil>=2.8.2",
         "PyYAML>=5.3.1",
