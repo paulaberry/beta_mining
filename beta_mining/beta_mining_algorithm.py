@@ -196,7 +196,8 @@ def main(config_settings):
     ### read in files and process different formats ###
     if os.path.isdir(output_path) == False:
         os.mkdir(output_path)
-    file_list = glob.glob(input_path + "**.pdb*", recursive = True)
+    file_list = glob.glob(input_path + "/**.pdb*", recursive = True)
+    print(file_list)
     file_number = 1
     file_total = len(file_list)
     for file in file_list:
