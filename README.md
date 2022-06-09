@@ -1,5 +1,5 @@
 # beta_mining
-A Python 3 package to mine the AlphaFold2 monomer database for secondary structure predictions.
+A Python 3 package to mine the AlphaFold2 monomer database for secondary structure predictions. Written for the [Halfmann Lab](https://research.stowers.org/halfmannlab/) at [Stowers Institute for Medical Research](https://www.stowers.org/).
 
 ## Installation
 This package can be installed via `pip install git+https://github.com/paulaberry/beta_mining.git`.
@@ -50,6 +50,14 @@ An experimental mode for identifying characteristic death domain protein structu
 * be between 80 and 120 residues long
 * contain 6 instances of 4 or more alpha-helix assigned residues in a row
 * contain multiple alpha-helix assigned residues within 10 angstroms of another alpha-helix assigned residue that is more than 4 residues away
+
+## Future directions
+
+Do you have a secondary structure you think might be hiding in monomeric predictions? Let me know!
+
+### To do
+* detailed logging to indicate why different proteins were rejected or not
+* create example notebooks
 
 
 ## References
