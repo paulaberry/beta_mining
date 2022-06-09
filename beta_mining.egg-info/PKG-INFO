@@ -12,4 +12,4 @@ Classifier: Development Status :: 3 - Alpha
 Classifier: Intended Audience :: Academic Researchers
 Classifier: License :: GPL v3
 Classifier: Programming Language :: Python :: 3
-Requires-Python: >=3.8
+Requires-Python: >=3
