@@ -18,7 +18,7 @@ setup(
 
     ],
     packages=find_packages(include=["bin.beta_mining", "beta_mining.beta_mining_algorithm.py", "beta_mining.beta_mining_functions.py"]),
-    python_requires=">=3.8",
+    python_requires=">=3",
     install_requires=[
         "biopython>=1.79",
         "biopandas>=0.4.1",
