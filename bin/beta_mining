@@ -9,6 +9,8 @@ sys.path.insert(0,"../")
 #sys.path.insert(0, "../beta_mining/")
 import pandas as pd
 import pkgutil
+
+import importlib.resources
 import yaml
 import shutil
 import signal
@@ -41,9 +43,14 @@ def generate_yaml(target_directory = os.getcwd(), prefix = "generated_"):
     target_directory -- directory where the YAML config file will be created
     prefix -- the prefix for the created YAML config file
     """
-    config_default_text = pkgutil.get_data("beta_mining","default_config.yml")
-    with open(target_directory + prefix + "config.yaml", "w") as configfile:
-        configfile.write(config_default_text.decode("utf-8"))
+    #config_default_text = pkgutil.get_data("beta_mining","default_config.yaml")
+    #print(target_directory)
+    #configfile =  open(target_directory + prefix + "config.yaml", "w")
+    #configfile.write(config_default_text.decode("utf-8"))
+    #configfile.close()
+    with importlib.resources.path("beta_mining", "default_config.yaml") as p:
+        shutil.copy(p, target_directory)
+
 
 def main():
     parser = ArgumentParser("beta_mining", description = script_description)
@@ -83,7 +90,7 @@ def main():
         yaml_stream.close()
 
     # If a config is specified, load all arguments from it.
-    elif args.config != "default_config.yml":
+    elif args.config != "default_config.yaml":
         config = open(args.config, "r")
         settings = yaml.load(config, Loader = yaml.FullLoader)
         config.close()
