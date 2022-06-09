@@ -30,7 +30,7 @@ setup(
         "PyYAML>=5.3.1",
         "scikit-image>=0.19.2",
         "scikit-learn>=1.0.2",
-        "scipy>=1.8.0",
+        "scipy",
         "simplejson>=3.16.0",
     ],
     data_files=[("", ["beta_mining/default_config.yaml", "beta_mining/structure_dictionary.json"])],
