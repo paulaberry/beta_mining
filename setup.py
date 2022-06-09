@@ -22,16 +22,12 @@ setup(
     install_requires=[
         "biopython>=1.79",
         "biopandas>=0.4.1",
-        "json5>=0.9.6",
         "numpy>=1.21",
         "pandas>=1.3",
         "ProDy>=2.0.2",
         "python-dateutil>=2.8.2",
         "PyYAML>=5.3.1",
-        "scikit-image>=0.19.2",
         "scikit-learn>=1.0.2",
-        "scipy",
-        "simplejson>=3.16.0",
     ],
     data_files=[("", ["beta_mining/default_config.yaml", "beta_mining/structure_dictionary.json"])],
 
